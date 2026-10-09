@@ -127,16 +127,14 @@ button {
 /* ---------- Menu ---------- */
 .menu { justify-content: center; }
 .menu-grid {
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
   gap: clamp(14px, 2.5vw, 28px);
   width: min(100%, 1100px);
   margin: 0 auto;
 }
-/* 3 on top, 2 centred below */
-.menu-tile { grid-column: span 2; }
-.menu-tile:nth-child(4) { grid-column: 2 / span 2; }
-.menu-tile:nth-child(5) { grid-column: 4 / span 2; }
+.menu-tile { width: calc((100% - 2 * clamp(14px, 2.5vw, 28px)) / 3); }
 
 .menu-tile, .mode-tile {
   aspect-ratio: 1.1;
@@ -148,7 +146,8 @@ button {
   transition: transform 0.1s;
   overflow: hidden;
 }
-.menu-tile:active, .mode-tile:active {
+.menu-tile.locked { filter: saturate(0.4) brightness(1.05); }
+.menu-tile:not(.locked):active, .mode-tile:active {
   transform: translateY(8px);
   box-shadow: 0 2px 0 color-mix(in srgb, var(--tile), #000 22%);
 }
@@ -175,6 +174,7 @@ button {
   width: min(100%, 900px);
   margin: 0 auto;
 }
+.mode-grid.three { grid-template-columns: repeat(3, 1fr); width: min(100%, 1000px); }
 .mode-icon { width: 55%; height: 55%; }
 .ripple { transform-origin: center; animation: ripple 1.6s ease-out infinite; }
 @keyframes ripple {
@@ -329,6 +329,7 @@ button {
   width: var(--s);
   height: var(--s);
 }
+.find-tile.waiting { visibility: hidden; }
 .find-tile.win { animation: win 0.7s cubic-bezier(0.3, 1.6, 0.5, 1) both; box-shadow: 0 0 0 8px #3cc46b, var(--shadow); }
 .find-tile.fade { opacity: 0.25; scale: 0.9; transition: all 0.3s; }
 
@@ -434,9 +435,7 @@ button {
 
 /* Portrait iPad: stack the find options and menu a bit differently */
 @media (orientation: portrait) {
-  .menu-grid { grid-template-columns: repeat(2, 1fr); }
-  .menu-tile, .menu-tile:nth-child(4), .menu-tile:nth-child(5) { grid-column: auto; }
-  .menu-tile:nth-child(5) { grid-column: 1 / span 2; justify-self: center; width: 50%; }
+  .menu-tile { width: calc((100% - clamp(14px, 2.5vw, 28px)) / 2); }
   .mode-grid { grid-template-columns: 1fr; width: min(100%, 420px); }
   .find-tile { --s: min(28vw, 30vh); }
   .count-obj { width: min(17vw, 13vh); }

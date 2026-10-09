@@ -4,7 +4,10 @@ A Dutch learning game for toddlers (2–6) on the iPad: numbers, letters (taught
 
 ## Run it
 
+Needs Node 22 (Vite 8 doesn't work on Node 20.15 and older). With nvm, `nvm use` picks the version from `.nvmrc`.
+
 ```bash
+nvm use
 npm install
 npm run dev        # opens on http://localhost:5173 and on your network
 ```
@@ -14,10 +17,10 @@ npm run dev        # opens on http://localhost:5173 and on your network
 ## What's in it
 
 - **Big Play button** – the first tap also unlocks sound on iOS.
-- **Menu** – Cijfers (123), Letters (abc), Vormen, Kleuren, Tellen.
+- **Menu** – Cijfers (123), Letters (abc), Vormen, Kleuren.
 - **Ontdekken** (explore) – tap anything to hear what it is. Numbers count stars along with the voice.
 - **Zoeken** (find it) – "Waar is de drie?" A wrong tap only gets a gentle wiggle and "Dat is de vier." There are no fail states.
-- **Tellen** (counting) – tap each object and the app counts along. It starts at up to 5 objects and goes up to 10 after a few rounds.
+- **Tellen** (counting, inside Cijfers) – tap each object and the app counts along. Each round has a random number of objects (1–10).
 - **Back button = press and hold** for about 1 second, so little hands don't leave the game by accident.
 
 ## Install on the iPad (GitHub Pages)
@@ -39,17 +42,22 @@ Until there are recorded clips, the app uses the iPad's built-in Dutch voice. In
 Every spoken line has a fixed key. To replace the built-in voice for a line:
 
 1. `npm run lines > lines.csv` prints every key and its text (about 200 lines).
-2. Generate or record each line as an mp3 named `<key>.mp3`, for example `letters.b.explore.mp3`, and put it in `public/audio/nl/`.
-3. Add the key to `public/audio/nl/manifest.json`:
+2. Put the mp3 in `public/audio/nl/`. Any file name works.
+3. Map the key to the file in `public/audio/nl/manifest.json`:
    ```json
-   { "clips": ["letters.b.explore", "letters.b.find"] }
+   { "clips": { "count.3": "3.mp3", "ui.welcome": "wat_zullen_we_oefenen.mp3" } }
    ```
+   One file can serve several keys (e.g. `3.mp3` for both `count.3` and `numbers.3.explore`).
 
 Lines without a clip keep using the built-in voice, so you can switch over gradually. **Start with the letters:** a text-to-speech voice can only approximate klanken ("buh", "mmm"). You can adjust these approximations in the `klank` column of `src/content/content.js`.
 
 ## Your own pictures
 
 The placeholder art is drawn in code in `src/components/Visuals.jsx`. The letter pictures are emoji for now (`picture` in `src/content/content.js`). To use AI-generated illustrations (e.g. from Leonardo), put them in `public/images/`. Then swap the component, for example `<img src={`${import.meta.env.BASE_URL}images/beer.png`} />`.
+
+## Showing or hiding topics
+
+Edit `src/config.js`: topics listed there appear in the menu.
 
 ## Where things live
 

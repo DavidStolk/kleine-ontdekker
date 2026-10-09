@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react'
 import SpeechTest from './components/SpeechTest.jsx'
-import { initSpeech, say, stopSpeech, unlockSpeech } from './lib/speech.js'
+import { ENABLED_TOPICS } from './config.js'
+import { initSpeech, say, sayLine, stopSpeech, unlockSpeech } from './lib/speech.js'
 import { sfx, unlockSfx } from './lib/sfx.js'
-import { lines, chooseLines } from './content/content.js'
+import { lines, chooseLines, topicLines } from './content/content.js'
 import { decks } from './content/decks.jsx'
+import { sleep } from './lib/random.js'
 import { HoldButton } from './components/Controls.jsx'
 import { Shape, Splat, CountObject } from './components/Visuals.jsx'
 import Explore from './games/Explore.jsx'
@@ -95,38 +97,36 @@ const TOPICS = [
       </div>
     ),
   },
-  {
-    id: 'counting',
-   
-    icon: (
-      <div className="menu-trio">
-        <CountObject kind="appel" />
-        <CountObject kind="appel" />
-        <CountObject kind="appel" />
-      </div>
-    ),
-  },
 ]
 
-const TOPIC_COLOURS = { numbers: '#FF5D8F', letters: '#4CC9F0', shapes: '#FFB703', colours: '#3CC46B', counting: '#9B5DE5' }
+const TOPIC_COLOURS = { numbers: '#FF5D8F', letters: '#4CC9F0', shapes: '#FFB703', colours: '#3CC46B' }
 
 function Menu({ welcome, go }) {
+  // After Play, the tiles stay locked until "Wat zullen we oefenen?" has finished.
+  const [ready, setReady] = useState(!welcome)
   useEffect(() => {
-    if (welcome) say(lines.welcome.key, lines.welcome.text)
+    if (!welcome) return
+    let alive = true
+    setReady(false)
+    // Safety net in case the audio never reports that it finished.
+    Promise.race([say(lines.welcome.key, lines.welcome.text), sleep(6000)]).then(() => alive && setReady(true))
+    return () => {
+      alive = false
+    }
   }, [welcome])
 
   return (
     <div className="menu">
       <div className="menu-grid">
-        {TOPICS.map((t, i) => (
+        {TOPICS.filter((t) => ENABLED_TOPICS.includes(t.id)).map((t, i) => (
           <button
             key={t.id}
-            className="menu-tile pop-in"
+            className={`menu-tile pop-in ${ready ? '' : 'locked'}`}
             style={{ '--tile': TOPIC_COLOURS[t.id], animationDelay: `${i * 70}ms` }}
             onPointerDown={() => {
+              if (!ready) return
               sfx.pop()
-              if (t.id === 'counting') go({ name: 'game', game: 'counting' })
-              else go({ name: 'mode', deck: t.id })
+              go({ name: 'mode', deck: t.id })
             }}
           >
             {t.icon}
@@ -140,13 +140,15 @@ function Menu({ welcome, go }) {
 function ModePicker({ deck, go }) {
   useEffect(() => {
     const l = chooseLines[deck.id]
-    say(l.key, l.text)
+    const intro = topicLines[deck.id]
+    // "Cijfers!" first, then the question (or the whole line by the built-in voice).
+    sayLine(intro ? { key: null, text: l.text, parts: [intro, l] } : l)
   }, [deck])
 
   return (
     <div className="modes">
       <HoldButton icon="back" onDone={() => go({ name: 'menu' })} />
-      <div className="mode-grid">
+      <div className={`mode-grid ${deck.id === 'numbers' ? 'three' : ''}`}>
         <button
           className="mode-tile pop-in"
           style={{ '--tile': deck.colour }}
@@ -167,6 +169,18 @@ function ModePicker({ deck, go }) {
         >
           <SearchIcon />
         </button>
+        {deck.id === 'numbers' && (
+          <button
+            className="mode-tile pop-in"
+            style={{ '--tile': deck.colour, animationDelay: '180ms' }}
+            onPointerDown={() => {
+              sfx.pop()
+              go({ name: 'game', game: 'counting', deck: deck.id })
+            }}
+          >
+            <CountIcon />
+          </button>
+        )}
       </div>
     </div>
   )
@@ -201,6 +215,16 @@ function SearchIcon() {
       <circle cx="42" cy="42" r="24" fill="rgba(255,255,255,.25)" stroke="#fff" strokeWidth="9" />
       <path d="M60 60 L82 82" stroke="#fff" strokeWidth="13" strokeLinecap="round" />
     </svg>
+  )
+}
+
+function CountIcon() {
+  return (
+    <div className="menu-trio" aria-label="Tellen">
+      <CountObject kind="appel" />
+      <CountObject kind="appel" />
+      <CountObject kind="appel" />
+    </div>
   )
 }
 

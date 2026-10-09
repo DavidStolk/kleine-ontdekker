@@ -3,6 +3,9 @@
 
 let ctx = null
 
+/** The shared, unlocked AudioContext (also used to play recorded voice clips). */
+export const audioContext = () => ctx
+
 export function unlockSfx() {
   const AC = window.AudioContext || window.webkitAudioContext
   if (!AC) return

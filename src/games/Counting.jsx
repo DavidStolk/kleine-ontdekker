@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { say, stopSpeech } from '../lib/speech.js'
+import { say, sayLine, stopSpeech } from '../lib/speech.js'
 import { sfx } from '../lib/sfx.js'
 import { pick, shuffle, sleep } from '../lib/random.js'
-import { countLine, countDoneLine, lines } from '../content/content.js'
+import { countAskLine, countLine, countDoneLine, lines } from '../content/content.js'
 import { CountObject, COUNT_KINDS, Glyph } from '../components/Visuals.jsx'
 import { Confetti } from '../components/Controls.jsx'
 import { PALETTE } from '../content/decks.jsx'
@@ -10,20 +10,20 @@ import { PALETTE } from '../content/decks.jsx'
 const COLS = 5
 const ROWS = 3
 
-/** Tap each object; the app counts along. Starts with up to 5, grows to 10. */
+/** Tap each object; the app counts along. Each round has a random 1–10 objects. */
 export default function Counting() {
   const [round, setRound] = useState(null)
   const [tapped, setTapped] = useState([]) // indexes in tap order
   const [done, setDone] = useState(false)
   const [burst, setBurst] = useState(0)
-  const rounds = useRef(0)
+  const last = useRef(null) // previous { n, kind }, so a round never repeats exactly
   const tappedRef = useRef([])
   const doneRef = useRef(false)
   const alive = useRef(true)
+  const intro = useRef(true) // say "Tellen!" before the first question
 
   const newRound = useCallback(() => {
-    const max = rounds.current < 4 ? 5 : 10
-    const n = 1 + Math.floor(Math.random() * max)
+    const n = pick(Array.from({ length: 10 }, (_, i) => i + 1).filter((x) => x !== last.current?.n))
     // Place objects in random cells of a grid, with a little jitter.
     const cells = shuffle(Array.from({ length: COLS * ROWS }, (_, i) => i)).slice(0, n)
     const objects = cells.map((c) => ({
@@ -33,16 +33,21 @@ export default function Counting() {
       jy: Math.random() * 0.3 - 0.15,
       rot: Math.random() * 30 - 15,
     }))
-    setRound({ id: Date.now(), n, kind: pick(COUNT_KINDS), objects, colour: pick(PALETTE) })
+    const kind = pick(COUNT_KINDS.filter((k) => k !== last.current?.kind))
+    last.current = { n, kind }
+    setRound({ id: Date.now(), n, kind, objects, colour: pick(PALETTE) })
     tappedRef.current = []
     doneRef.current = false
     setTapped([])
     setDone(false)
+    const ask = countAskLine(kind)
+    sayLine(intro.current ? { key: null, text: `${lines.counting.text} ${ask.text}`, parts: [lines.counting, ask] } : ask)
+    intro.current = false
   }, [])
 
   useEffect(() => {
     alive.current = true
-    say(lines.counting.key, lines.counting.text)
+    intro.current = true
     newRound()
     return () => {
       alive.current = false
@@ -72,7 +77,6 @@ export default function Counting() {
     const d = countDoneLine(round.n)
     await say(d.key, d.text)
     await sleep(1400)
-    rounds.current++
     if (alive.current) newRound()
   }
 
