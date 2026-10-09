@@ -445,3 +445,41 @@ button {
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; }
 }
+
+/* ---------- Parent corner + speech test ---------- */
+.parent-corner { position: absolute; right: 0; bottom: 0; }
+.parent-corner .hold-btn { position: relative; width: 48px; height: 48px; opacity: 0.55; }
+.parent-corner .hold-btn .btn-icon { width: 22px; height: 22px; }
+
+.speechtest {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-top: 76px;
+  user-select: text;
+  -webkit-user-select: text;
+}
+.speechtest h2 { margin: 0 0 12px; font-size: 32px; }
+.speechtest h3 { margin: 24px 0 8px; font-size: 22px; }
+.speechtest p, .speechtest li { font-size: 17px; line-height: 1.45; }
+.st-card { background: #fff; border-radius: 20px; padding: 16px 20px; box-shadow: 0 4px 0 rgba(59, 47, 74, 0.08); max-width: 820px; }
+.st-status { display: grid; grid-template-columns: auto 1fr; gap: 4px 16px; font-size: 17px; }
+.st-status b { font-weight: 600; }
+.st-ok { color: #2a9d55; }
+.st-bad { color: #d62839; }
+.st-btn {
+  display: inline-block;
+  margin: 6px 8px 6px 0;
+  padding: 14px 20px;
+  border-radius: 14px;
+  background: #4cc9f0;
+  color: #fff;
+  font-weight: 600;
+  font-size: 18px;
+}
+.st-voice { background: #efe9f7; color: var(--ink); text-align: left; }
+.st-voice.active { background: #9b5de5; color: #fff; }
+.st-log { font-family: ui-monospace, Menlo, monospace; font-size: 13px; background: #2b2438; color: #e9e3f5; border-radius: 14px; padding: 12px 14px; max-height: 260px; overflow-y: auto; white-space: pre-wrap; }

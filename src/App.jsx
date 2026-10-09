@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import SpeechTest from './components/SpeechTest.jsx'
 import { initSpeech, say, stopSpeech, unlockSpeech } from './lib/speech.js'
 import { sfx, unlockSfx } from './lib/sfx.js'
 import { lines, chooseLines } from './content/content.js'
@@ -25,7 +26,10 @@ export default function App() {
   return (
     <div className="app">
       <Background />
-      {screen.name === 'start' && <StartScreen onPlay={() => go({ name: 'menu', welcome: true })} />}
+      {screen.name === 'start' && (
+        <StartScreen onPlay={() => go({ name: 'menu', welcome: true })} onTest={() => go({ name: 'speechtest' })} />
+      )}
+      {screen.name === 'speechtest' && <SpeechTest onBack={() => go({ name: 'start' })} />}
       {screen.name === 'menu' && <Menu welcome={screen.welcome} go={go} />}
       {screen.name === 'mode' && <ModePicker deck={decks[screen.deck]} go={go} />}
       {screen.name === 'game' && <Game screen={screen} go={go} />}
@@ -33,9 +37,10 @@ export default function App() {
   )
 }
 
-function StartScreen({ onPlay }) {
+function StartScreen({ onPlay, onTest }) {
   function play() {
-    // This first tap unlocks sound + speech on iOS.
+    // This first tap unlocks sound + speech on iOS. It must run on click (finger
+    // lifted): iOS doesn't count pointerdown on a touchscreen as a user gesture.
     unlockSfx()
     unlockSpeech()
     sfx.yay()
@@ -52,11 +57,15 @@ function StartScreen({ onPlay }) {
           <span key={i} style={{ animationDelay: `${(i + 6) * 80}ms` }}>{c}</span>
         ))}
       </h1>
-      <button className="play-btn" aria-label="Spelen" onPointerDown={play}>
+      <button className="play-btn" aria-label="Spelen" onClick={play}>
         <svg viewBox="0 0 100 100">
           <path d="M36 24 L78 50 L36 76 Z" fill="#fff" stroke="#fff" strokeWidth="10" strokeLinejoin="round" />
         </svg>
       </button>
+      {/* Parent corner: hold to open the speech test screen. */}
+      <div className="parent-corner">
+        <HoldButton icon="gear" label="Spraaktest" onDone={onTest} />
+      </div>
     </div>
   )
 }

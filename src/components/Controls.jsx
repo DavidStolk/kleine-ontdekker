@@ -39,7 +39,7 @@ export function HoldButton({ onDone, label = 'Terug', icon = 'home' }) {
         <circle cx="24" cy="24" r="21" className="ring-bg" />
         <circle cx="24" cy="24" r="21" className="ring-fill" />
       </svg>
-      {icon === 'home' ? <HomeIcon /> : <BackIcon />}
+      {icon === 'home' ? <HomeIcon /> : icon === 'gear' ? <GearIcon /> : <BackIcon />}
     </button>
   )
 }
@@ -51,6 +51,17 @@ function HomeIcon() {
     </svg>
   )
 }
+function GearIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="btn-icon">
+      <path
+        d="M12 8.5a3.5 3.5 0 100 7 3.5 3.5 0 000-7zm8.6 4.9l1.9 1.5-2 3.4-2.3-.9a7.6 7.6 0 01-1.7 1l-.3 2.4h-4l-.4-2.4a7.6 7.6 0 01-1.7-1l-2.3.9-2-3.4 1.9-1.5a7.7 7.7 0 010-2L1.8 8.9l2-3.4 2.3.9c.5-.4 1.1-.7 1.7-1L8.1 3h4l.3 2.4c.6.3 1.2.6 1.7 1l2.3-.9 2 3.4-1.9 1.5a7.7 7.7 0 010 2z"
+        fill="currentColor"
+      />
+    </svg>
+  )
+}
+
 function BackIcon() {
   return (
     <svg viewBox="0 0 24 24" className="btn-icon">
