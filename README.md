@@ -21,6 +21,7 @@ npm run dev        # opens on http://localhost:5173 and on your network
 - **Ontdekken** (explore) – tap anything to hear what it is. Numbers count stars along with the voice.
 - **Zoeken** (find it) – "Waar is de drie?" A wrong tap only gets a gentle wiggle and "Dat is de vier." There are no fail states.
 - **Tellen** (counting, inside Cijfers) – tap each object and the app counts along. Each round has a random number of objects (1–10).
+- **Schrijven** (writing, inside Cijfers) – trace a random number (1–10) with a finger. A dot first shows how the number is written, then arrows show the way along each stroke, in writing order. The stroke drawings live in `src/content/strokes.js`.
 - **Back button = press and hold** for about 1 second, so little hands don't leave the game by accident.
 
 ## Install on the iPad (GitHub Pages)
@@ -65,7 +66,8 @@ Edit `src/config.js`: topics listed there appear in the menu.
 |---|---|
 | All content (numbers, letters, shapes, colours, praise) | `src/content/content.js` |
 | How each topic is drawn and spoken | `src/content/decks.jsx` |
-| Games | `src/games/Explore.jsx`, `FindIt.jsx`, `Counting.jsx` |
+| Games | `src/games/Explore.jsx`, `FindIt.jsx`, `Counting.jsx`, `Writing.jsx` |
+| How each digit is written (strokes for Schrijven) | `src/content/strokes.js` |
 | Speech (clip → built-in voice fallback) | `src/lib/speech.js` |
 | Sound effects (synthesised) | `src/lib/sfx.js` |
 | Styling | `src/styles.css` |

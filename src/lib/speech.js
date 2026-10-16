@@ -132,16 +132,26 @@ export function say(key, text, { rate = 0.9, pitch = 1.15 } = {}) {
  * A clip for the whole line wins; otherwise, if every part has a clip, the parts
  * play back to back; otherwise the built-in voice reads the whole text.
  * A line without a key is just a sequence: each part plays on its own (clip or voice).
+ * Parts can have parts themselves, e.g. "Schrijven!" + ("Schrijf de" + "drie").
  */
 export async function sayLine(line) {
-  const { key, text, parts } = line
-  const sequence = parts && (!key || (!clips.has(key) && parts.every((p) => clips.has(p.key))))
-  if (!sequence) return say(key, text)
-  for (const p of parts) {
-    const before = token
-    await say(p.key, p.text)
-    if (token !== before + 1) return // interrupted by something newer
+  await playLine(line)
+}
+
+/** Has a clip for the whole line, or for every piece of it. */
+const covered = (l) => clips.has(l.key) || !!l.parts?.every(covered)
+
+/** Returns false when something newer interrupted the line. */
+async function playLine({ key, text, parts }) {
+  const sequence = parts && (!key || (!clips.has(key) && parts.every(covered)))
+  if (!sequence) {
+    const done = say(key, text)
+    const mine = token // say() has just claimed a new token
+    await done
+    return token === mine
   }
+  for (const p of parts) if (!(await playLine(p))) return false
+  return true
 }
 
 function loadClip(file) {

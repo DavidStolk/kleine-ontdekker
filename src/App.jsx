@@ -11,6 +11,7 @@ import { Shape, Splat, CountObject } from './components/Visuals.jsx'
 import Explore from './games/Explore.jsx'
 import FindIt from './games/FindIt.jsx'
 import Counting from './games/Counting.jsx'
+import Writing from './games/Writing.jsx'
 
 // Screens: start → menu → (topic → mode) → game
 export default function App() {
@@ -137,6 +138,14 @@ function Menu({ welcome, go }) {
   )
 }
 
+// The games per topic. Numbers has two extra: counting and writing.
+const MODES = [
+  { game: 'explore', Icon: TapIcon },
+  { game: 'find', Icon: SearchIcon },
+  { game: 'counting', Icon: CountIcon, only: 'numbers' },
+  { game: 'writing', Icon: PencilIcon, only: 'numbers' },
+]
+
 function ModePicker({ deck, go }) {
   useEffect(() => {
     const l = chooseLines[deck.id]
@@ -145,42 +154,24 @@ function ModePicker({ deck, go }) {
     sayLine(intro ? { key: null, text: l.text, parts: [intro, l] } : l)
   }, [deck])
 
+  const modes = MODES.filter((m) => !m.only || m.only === deck.id)
   return (
     <div className="modes">
       <HoldButton icon="back" onDone={() => go({ name: 'menu' })} />
-      <div className={`mode-grid ${deck.id === 'numbers' ? 'three' : ''}`}>
-        <button
-          className="mode-tile pop-in"
-          style={{ '--tile': deck.colour }}
-          onPointerDown={() => {
-            sfx.pop()
-            go({ name: 'game', game: 'explore', deck: deck.id })
-          }}
-        >
-          <TapIcon />
-        </button>
-        <button
-          className="mode-tile pop-in"
-          style={{ '--tile': deck.colour, animationDelay: '90ms' }}
-          onPointerDown={() => {
-            sfx.pop()
-            go({ name: 'game', game: 'find', deck: deck.id })
-          }}
-        >
-          <SearchIcon />
-        </button>
-        {deck.id === 'numbers' && (
+      <div className={`mode-grid ${modes.length === 4 ? 'four' : ''}`}>
+        {modes.map(({ game, Icon }, i) => (
           <button
+            key={game}
             className="mode-tile pop-in"
-            style={{ '--tile': deck.colour, animationDelay: '180ms' }}
+            style={{ '--tile': deck.colour, animationDelay: `${i * 90}ms` }}
             onPointerDown={() => {
               sfx.pop()
-              go({ name: 'game', game: 'counting', deck: deck.id })
+              go({ name: 'game', game, deck: deck.id })
             }}
           >
-            <CountIcon />
+            <Icon />
           </button>
-        )}
+        ))}
       </div>
     </div>
   )
@@ -195,6 +186,7 @@ function Game({ screen, go }) {
       {screen.game === 'explore' && <Explore deck={deck} />}
       {screen.game === 'find' && <FindIt deck={deck} />}
       {screen.game === 'counting' && <Counting />}
+      {screen.game === 'writing' && <Writing />}
     </div>
   )
 }
@@ -225,6 +217,22 @@ function CountIcon() {
       <CountObject kind="appel" />
       <CountObject kind="appel" />
     </div>
+  )
+}
+
+function PencilIcon() {
+  return (
+    <svg viewBox="0 0 100 100" className="mode-icon" aria-label="Schrijven">
+      {/* Shifted so the drawing sits in the middle of the tile. */}
+      <g transform="translate(-2 5)">
+        <path d="M14 80 C26 62 38 90 50 72 S70 58 78 74" fill="none" stroke="#fff" strokeWidth="6" strokeLinecap="round" opacity=".6" />
+        <g transform="rotate(45 58 40)">
+          <rect x="48" y="4" width="20" height="56" rx="4" fill="#fff" />
+          <rect x="48" y="4" width="20" height="10" rx="4" fill="#fff" opacity=".6" />
+          <path d="M48 60 L68 60 L58 80 Z" fill="#fff" opacity=".85" strokeLinejoin="round" />
+        </g>
+      </g>
+    </svg>
   )
 }
 

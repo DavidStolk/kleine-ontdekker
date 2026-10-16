@@ -40,5 +40,7 @@ export const sfx = {
       tone({ freq: f, dur: 0.18, type: 'triangle', vol: 0.25, delay: i * 0.09 }),
     )
   },
+  // Soft tick while tracing; rises in pitch as the stroke gets further along (0–1).
+  draw: (f) => tone({ freq: 380 + f * 520, dur: 0.05, type: 'sine', vol: 0.12 }),
   count: (n) => tone({ freq: 440 * Math.pow(2, (n - 1) / 12), dur: 0.12, type: 'triangle', vol: 0.25 }),
 }
